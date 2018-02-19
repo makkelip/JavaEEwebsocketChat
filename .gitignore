@@ -1,0 +1,15 @@
+#Netbeans
+
+nbproject/private/
+
+build/
+
+nbbuild/
+
+dist/
+
+nbdist/
+
+.nb-gradle/
+
+/testChat/nbproject/private/
