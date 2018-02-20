@@ -15,11 +15,11 @@ public class User {
     private String name;
 
     public User() {
-        
     }
     
-    public User(String name) {
+    public User(String name, int id) {
         this.name = name;
+        this.id = id;
     }
 
     public void setId(int id) {
