@@ -32,7 +32,7 @@ function onMessage(event){
 
 function printMessage(message) {
   let msgElement = document.createElement("div");
-  let text = document.createTextNode(message.message);
+  let text = document.createTextNode(message.name + ": " + message.message);
   msgElement.appendChild(text);
   chatWindow.appendChild(msgElement);
 }

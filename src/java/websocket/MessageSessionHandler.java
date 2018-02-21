@@ -6,6 +6,7 @@
 package websocket;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -67,18 +68,30 @@ public class MessageSessionHandler {
     }
     
     private boolean userExists(String name) {
-        for (User u : users) {
-            if (name.equals(u.getName())) {
-                return true;
-            }
+        if (users.stream().anyMatch((u) -> (name.equals(u.getName())))) {
+            return true;
         }
         return false;
     }
     
+    private User getUserById(int id) {
+        for (User u : users) {
+            if (id == u.getId()) {
+                return u;
+            }
+        }
+        return null;
+    }
+    
     public void newMessage(JsonObject messageJson, Session session) {
-        Message m = new Message(messageJson.getString("message"), usersOnline.get(session).getId());
-        messages.add(m);
-        sendToAllConnectedSessions(messageJson);
+        Message msg = new Message(messageJson.getString("message"), 0);
+        messages.add(msg);
+        JsonObjectBuilder messageBuilder = JsonProvider.provider().createObjectBuilder();
+        messageBuilder.add("action", "message")
+                .add("message", messageJson.getString("message"))
+                .add("name", getUserById(msg.getSenderId()).getName());
+        sendToAllConnectedSessions(messageBuilder.build());
+        
     }
     
     public void whoOnline(Session session) {
