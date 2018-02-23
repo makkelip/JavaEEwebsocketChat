@@ -26,19 +26,29 @@ function onMessage(event){
     console.log("login success");
     loginSuccess(message);
   } else if (message.action === "whoOnlineResponse") {
-    printAllMessages(message);
+
+  } else if (message.action === "getMessages") {
+    console.log("got all messages");
+    allMessages(message);
   }
 }
 
-function printMessage(message) {
-  let msgElement = document.createElement("div");
-  let text = document.createTextNode(message.name + ": " + message.message);
-  msgElement.appendChild(text);
-  chatWindow.appendChild(msgElement);
+function singleMessage(message) {
+  printMessage(message.name, message.message);
 }
 
-function printAllMessages(message) {
+function allMessages(message) {
+  let allMessages = message.messages;
+  Object.entries(allMessages).forEach(
+    ([name, text]) => printMessage(name, text)
+  );
+}
 
+function printMessage(name, text) {
+  let msgElement = document.createElement("div");
+  let text = document.createTextNode(name + ": " + text);
+  msgElement.appendChild(text);
+  chatWindow.appendChild(msgElement);
 }
 
 function login() {
@@ -63,10 +73,10 @@ function loginSuccess(message) {
   alert(message.note);
   messageWindow.style.display = '';
   document.getElementById("loginWindow").style.display = 'none';
-  let whoOnline = {
-    action: "waat"
+  let getAllMessages = {
+    action: "getMessages"
   }
-  socket.send(JSON.stringify(whoOnline));
+  socket.send(JSON.stringify(getAllMessages));
 }
 
 function sendMessage() {

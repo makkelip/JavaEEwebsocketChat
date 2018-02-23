@@ -50,6 +50,7 @@ public class MessageWebSocketServer {
     
     @OnMessage
     public void handleMessage(String message, Session session) {
+        System.out.println(message);
         try (JsonReader reader = Json.createReader(new StringReader(message))) {
             JsonObject jsonMessage = reader.readObject();
             
@@ -59,6 +60,9 @@ public class MessageWebSocketServer {
                 sessionHandler.whoOnline(session);
             } else if ("login".equals(jsonMessage.getString("action"))) {
                 sessionHandler.login(jsonMessage, session);
+            } else if ("getMessages".equals(jsonMessage.getString("action"))) {
+                System.out.println("getMessage action");
+                sessionHandler.sendAllMessages(session);
             }
         }
     }

@@ -40,6 +40,7 @@ public class MessageSessionHandler {
     }
     
     public void removeSession(Session session) {
+        usersOnline.remove(session);
         sessions.remove(session);
     }
     
@@ -83,8 +84,17 @@ public class MessageSessionHandler {
         return null;
     }
     
+    private User getUserByName(String name) {
+        for (User u : users) {
+            if (name == u.getName()) {
+                return u;
+            }
+        }
+        return null;
+    }
+    
     public void newMessage(JsonObject messageJson, Session session) {
-        Message msg = new Message(messageJson.getString("message"), 0);
+        Message msg = new Message(messageJson.getString("message"), usersOnline.get(session).getId());
         messages.add(msg);
         JsonObjectBuilder messageBuilder = JsonProvider.provider().createObjectBuilder();
         messageBuilder.add("action", "message")
@@ -106,25 +116,39 @@ public class MessageSessionHandler {
         sendToSession(session, response.build());
     }
     
+    public void sendAllMessages(Session session) {
+        System.out.println("sendAllMessages gets called");
+        JsonObjectBuilder allMessages = JsonProvider.provider().createObjectBuilder();
+        for (Message m : messages) {
+            allMessages.add(getUserById(m.getSenderId()).getName(), m.getMessage());
+        }
+        JsonObjectBuilder contained = JsonProvider.provider().createObjectBuilder()
+                .add("action", "getMessages")
+                .add("messages", allMessages.build());
+        sendToSession(session, contained.build());
+    }
+    
     public void login(JsonObject info, Session session) {
         JsonObjectBuilder loginResponse = JsonProvider.provider().createObjectBuilder();
         
         if(userOnline(info.getString("name"))) {
             loginResponse.add("action", "loginFailed")
                 .add("note", "Username already in use");
-        } else if (userExists(info.getString("name"))) {
-            loginResponse.add("action", "loginSuccess")
-                .add("note","Username found logging in");
         } else if (info.getString("name").isEmpty()){
             loginResponse.add("action", "loginFailed")
                     .add("note", "nameEmpty");
-        }else {
-            users.add(new User(info.getString("name"),userId));
-            userId++;
-            loginResponse.add("action", "loginSuccess")
-                    .add("note", "Account created logging in");
+        } else {
+            if (userExists(info.getString("name"))) {
+                loginResponse.add("action", "loginSuccess")
+                    .add("note","Username found logging in");
+            }else {
+                users.add(new User(info.getString("name"),userId));
+                userId++;
+                loginResponse.add("action", "loginSuccess")
+                        .add("note", "Account created logging in");
+            }
+            usersOnline.put(session, getUserByName(info.getString("name")));
         }
-        
         sendToSession(session, loginResponse.build());
     }
 }
