@@ -7,10 +7,14 @@ package websocket;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
@@ -31,7 +35,7 @@ public class MessageSessionHandler {
     
     private int userId = 0;
     private final Set<Session> sessions = new HashSet<>();
-    private final Set<Message> messages = new HashSet<>();
+    private final Stack<Message> messages = new Stack<>();
     private final Set<User> users = new HashSet<>();
     private final Map<Session,User> usersOnline = new HashMap<>();
     
@@ -117,10 +121,12 @@ public class MessageSessionHandler {
     }
     
     public void sendAllMessages(Session session) {
-        System.out.println("sendAllMessages gets called");
-        JsonObjectBuilder allMessages = JsonProvider.provider().createObjectBuilder();
+        JsonArrayBuilder allMessages = JsonProvider.provider().createArrayBuilder();
+        JsonObjectBuilder singleMessage = JsonProvider.provider().createObjectBuilder();
         for (Message m : messages) {
-            allMessages.add(getUserById(m.getSenderId()).getName(), m.getMessage());
+            singleMessage.add("sender", getUserById(m.getSenderId()).getName());
+            singleMessage.add("text", m.getMessage());
+            allMessages.add(singleMessage.build());
         }
         JsonObjectBuilder contained = JsonProvider.provider().createObjectBuilder()
                 .add("action", "getMessages")

@@ -1,5 +1,5 @@
 
-let socket = new WebSocket("ws://localhost:8080/testChat/actions");
+let socket = new WebSocket("ws://84.248.104.20/testChat/actions");
 socket.onmessage = onMessage;
 let username;
 let messageWindow;
@@ -18,7 +18,7 @@ window.onload = function() {
 function onMessage(event){
   let message = JSON.parse(event.data);
   if (message.action === "message") {
-    printMessage(message);
+    singleMessage(message);
   } else if (message.action === "loginFailed") {
     console.log("login failed");
     loginFailed(message);
@@ -39,15 +39,15 @@ function singleMessage(message) {
 
 function allMessages(message) {
   let allMessages = message.messages;
-  Object.entries(allMessages).forEach(
-    ([name, text]) => printMessage(name, text)
-  );
+  allMessages.forEach(function(msg) {
+    printMessage(msg.sender, msg.text);
+  });
 }
 
 function printMessage(name, text) {
   let msgElement = document.createElement("div");
-  let text = document.createTextNode(name + ": " + text);
-  msgElement.appendChild(text);
+  let msg = document.createTextNode(name + ": " + text);
+  msgElement.appendChild(msg);
   chatWindow.appendChild(msgElement);
 }
 
